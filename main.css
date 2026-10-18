@@ -45,3 +45,32 @@ button {
     border-radius: 10px;
 
 }
+
+.container{
+    padding:20px;
+}
+
+.card{
+    background:#2f2f2f;
+    padding:20px;
+    margin-bottom:20px;
+    border-radius:10px;
+}
+
+select{
+    width:100%;
+    padding:10px;
+    margin-bottom:10px;
+}
+
+.split{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:20px;
+}
+
+pre{
+    background:black;
+    color:#7CFC00;
+    padding:15px;
+}
