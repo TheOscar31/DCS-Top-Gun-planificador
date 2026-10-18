@@ -1,0 +1,93 @@
+[
+  {
+    "id": "shell11",
+    "callsign": "Shell 1-1",
+    "aircraft": "KC-135",
+    "radio": "235.100",
+    "tacan": {
+      "channel": "35X",
+      "ident": "SH1"
+    },
+    "altitude_ft": 24000,
+    "mach": 0.65,
+    "zone": "Sur-Este"
+  },
+  {
+    "id": "shell21",
+    "callsign": "Shell 2-1",
+    "aircraft": "KC-135",
+    "radio": "235.150",
+    "tacan": {
+      "channel": "35Y",
+      "ident": "SH2"
+    },
+    "altitude_ft": 26000,
+    "mach": 0.64,
+    "zone": "Noroeste"
+  },
+  {
+    "id": "texaco11",
+    "callsign": "Texaco 1-1",
+    "aircraft": "KC-135 MPRS",
+    "radio": "235.200",
+    "tacan": {
+      "channel": "36X",
+      "ident": "TX1"
+    },
+    "altitude_ft": 22000,
+    "mach": 0.62,
+    "zone": "Sur-Este"
+  },
+  {
+    "id": "texaco21",
+    "callsign": "Texaco 2-1",
+    "aircraft": "KC-135 MPRS",
+    "radio": "235.250",
+    "tacan": {
+      "channel": "36Y",
+      "ident": "TX2"
+    },
+    "altitude_ft": 22000,
+    "mach": 0.63,
+    "zone": "Noroeste"
+  },
+  {
+    "id": "navy11",
+    "callsign": "Navy One 1-1",
+    "aircraft": "S-3B",
+    "radio": "235.300",
+    "tacan": {
+      "channel": "37X",
+      "ident": "NV1"
+    },
+    "altitude_ft": 15000,
+    "mach": 0.50,
+    "zone": "Zona de portaaviones"
+  },
+  {
+    "id": "arco11",
+    "callsign": "Arco 1-1",
+    "aircraft": "KC-135 MPRS",
+    "radio": "235.400",
+    "tacan": {
+      "channel": "38X",
+      "ident": "AR1"
+    },
+    "altitude_ft": 18000,
+    "mach": 0.57,
+    "zone": "Polígono dogfights"
+  },
+  {
+    "id": "arco21",
+    "callsign": "Arco 2-1",
+    "aircraft": "KC-135 MPRS",
+    "radio": "235.500",
+    "tacan": {
+      "channel": "39X",
+      "ident": "AR2"
+    },
+    "altitude_ft": 18000,
+    "mach": 0.57,
+    "zone": "Polígono dogfights"
+  }
+]

@@ -1,0 +1,71 @@
+[
+  {
+    "id": "ZT1",
+    "name": "Zulu Tango 1",
+    "type": "Aire-Superficie",
+    "location": "25 nm NW Krymsk",
+    "frequency": "253.100",
+    "tacan": {
+      "channel": "101X",
+      "ident": "ZT1"
+    }
+  },
+  {
+    "id": "ZT2",
+    "name": "Zulu Tango 2",
+    "type": "Aire-Superficie",
+    "location": "25 nm NE Tiflis",
+    "frequency": "253.200",
+    "tacan": {
+      "channel": "102X",
+      "ident": "ZT2"
+    }
+  },
+  {
+    "id": "ZT3",
+    "name": "Zulu Tango 3",
+    "type": "Aire-Superficie",
+    "location": "30 nm SE Tiflis",
+    "frequency": "253.300",
+    "tacan": {
+      "channel": "103X",
+      "ident": "ZT3"
+    }
+  },
+  {
+    "id": "DRN1",
+    "name": "Delta Romeo November 1",
+    "type": "Aire-Aire",
+    "subtype": "Drones",
+    "location": "80 nm NW Krymsk",
+    "frequency": "254.100",
+    "tacan": {
+      "channel": "121X",
+      "ident": "DRN1"
+    }
+  },
+  {
+    "id": "DRN2",
+    "name": "Delta Romeo November 2",
+    "type": "Aire-Aire",
+    "subtype": "Drones",
+    "location": "50 nm S Tiflis",
+    "frequency": "254.200",
+    "tacan": {
+      "channel": "122X",
+      "ident": "DRN2"
+    }
+  },
+  {
+    "id": "DFT1",
+    "name": "Delta Foxtrot Tango 1",
+    "type": "Dogfight",
+    "subtype": "Armamento Simulado",
+    "location": "Frente a costa Sujumi",
+    "frequency": "255.100",
+    "tacan": {
+      "channel": "105X",
+      "ident": "DFT1"
+    }
+  }
+]

@@ -1,0 +1,35 @@
+[
+  {
+    "id": "otb1",
+    "name": "Outbase 1",
+    "type": "Fighter Outbase",
+    "frequency": "112.100",
+    "tacan": {
+      "channel": "91X",
+      "ident": "OTB1"
+    },
+    "landing": {
+      "heading": 326,
+      "runway_length_m": 2500
+    },
+    "departure": {
+      "instructions": "Después de curva: rumbo 064º"
+    }
+  },
+  {
+    "id": "otb2",
+    "name": "Outbase 2",
+    "type": "Fighter Outbase",
+    "frequency": "112.200",
+    "tacan": {
+      "channel": "92X",
+      "ident": "OTB2"
+    },
+    "landing": {
+      "heading": 56
+    },
+    "departure": {
+      "instructions": "Después de FARP"
+    }
+  }
+]

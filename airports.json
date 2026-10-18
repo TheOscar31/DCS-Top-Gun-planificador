@@ -1,0 +1,299 @@
+[
+  {
+    "icao": "UGTB",
+    "name": "Tiflis-Lochini",
+    "tacan": {
+      "channel": "80X",
+      "ident": "TFL"
+    },
+    "tower": ["138.100", "267.100"],
+    "runways": [
+      {
+        "runway": "13R",
+        "tacan": "81X",
+        "heading": 121,
+        "ils": {
+          "frequency": "110.30",
+          "ident": "IVP"
+        }
+      },
+      {
+        "runway": "31L",
+        "tacan": "82X",
+        "heading": 301,
+        "ils": {
+          "frequency": "108.90",
+          "ident": "INA"
+        }
+      }
+    ]
+  },
+  {
+    "icao": "UGKS",
+    "name": "Senaki-Kolkhi",
+    "tacan": {
+      "channel": "31X",
+      "ident": "TSK"
+    },
+    "tower": ["132.100", "261.100"],
+    "runways": [
+      {
+        "runway": "09",
+        "tacan": "32X",
+        "heading": 88,
+        "ils": {
+          "frequency": "108.90",
+          "ident": "ITS"
+        }
+      },
+      {
+        "runway": "27",
+        "tacan": "33X",
+        "heading": 268,
+        "ils": null
+      }
+    ]
+  },
+  {
+    "icao": "UGKO",
+    "name": "Kutaisi",
+    "tacan": {
+      "channel": "44X",
+      "ident": "KTS"
+    },
+    "tower": ["134.100", "263.100"],
+    "runways": [
+      {
+        "runway": "07",
+        "tacan": "45X",
+        "heading": 67,
+        "ils": {
+          "frequency": "109.75",
+          "ident": "IKS"
+        }
+      },
+      {
+        "runway": "25",
+        "tacan": "46X",
+        "heading": 247,
+        "ils": null
+      }
+    ]
+  },
+  {
+    "icao": "UGSB",
+    "name": "Kobuleti",
+    "tacan": {
+      "channel": "67X",
+      "ident": "KOB"
+    },
+    "tower": ["133.100", "262.100"],
+    "runways": [
+      {
+        "runway": "07",
+        "tacan": "68X",
+        "heading": 63,
+        "ils": {
+          "frequency": "111.50",
+          "ident": "IKB"
+        }
+      },
+      {
+        "runway": "25",
+        "tacan": "69X",
+        "heading": 243,
+        "ils": null
+      }
+    ]
+  },
+  {
+    "icao": "UGSS",
+    "name": "Sujumi-Babushara",
+    "tacan": {
+      "channel": "15X",
+      "ident": null
+    },
+    "tower": ["129.100", "258.100"],
+    "runways": [
+      {
+        "runway": "12",
+        "tacan": null,
+        "heading": 109,
+        "ils": null
+      },
+      {
+        "runway": "30",
+        "tacan": null,
+        "heading": 289,
+        "ils": null
+      }
+    ]
+  },
+  {
+    "icao": "UGUD",
+    "name": "Gudauta",
+    "tacan": {
+      "channel": "24X",
+      "ident": "GDT"
+    },
+    "tower": ["130.100", "259.100"],
+    "runways": [
+      {
+        "runway": "15",
+        "tacan": null,
+        "heading": 143,
+        "ils": null
+      },
+      {
+        "runway": "33",
+        "tacan": null,
+        "heading": 323,
+        "ils": null
+      }
+    ]
+  },
+  {
+    "icao": "URSS",
+    "name": "Sochi-Adler",
+    "tacan": {
+      "channel": "26X",
+      "ident": "SCH"
+    },
+    "tower": ["127.100", "256.100"],
+    "runways": [
+      {
+        "runway": "06",
+        "tacan": null,
+        "heading": 54,
+        "ils": {
+          "frequency": "111.10",
+          "ident": "ISO"
+        }
+      },
+      {
+        "runway": "24",
+        "tacan": null,
+        "heading": 234,
+        "ils": null
+      }
+    ]
+  },
+  {
+    "icao": "UGSB-BAT",
+    "name": "Batumi",
+    "tacan": {
+      "channel": "16X",
+      "ident": "BTM"
+    },
+    "tower": ["131.100", "260.100"],
+    "runways": [
+      {
+        "runway": "13",
+        "tacan": "17X",
+        "heading": 119,
+        "ils": {
+          "frequency": "110.30",
+          "ident": "ILU"
+        }
+      },
+      {
+        "runway": "31",
+        "tacan": "18X",
+        "heading": 299,
+        "ils": null
+      }
+    ]
+  },
+  {
+    "icao": "URKK-W",
+    "name": "Krasnodar-Pashkovsky West",
+    "tacan": {
+      "channel": "27X",
+      "ident": null
+    },
+    "tower": ["128.100", "257.100"],
+    "runways": [
+      {
+        "runway": "05L",
+        "tacan": null,
+        "heading": 39,
+        "ils": null
+      },
+      {
+        "runway": "23R",
+        "tacan": null,
+        "heading": 219,
+        "ils": null
+      }
+    ]
+  },
+  {
+    "icao": "URKG",
+    "name": "Gelendzhik",
+    "tacan": {
+      "channel": "28X",
+      "ident": null
+    },
+    "tower": ["126.100", "255.100"],
+    "runways": [
+      {
+        "runway": "01",
+        "tacan": null,
+        "heading": 32,
+        "ils": null
+      },
+      {
+        "runway": "19",
+        "tacan": null,
+        "heading": 212,
+        "ils": null
+      }
+    ]
+  },
+  {
+    "icao": "URKK",
+    "name": "Krasnodar-Pashkovsky East",
+    "tacan": {
+      "channel": "27Y",
+      "ident": null
+    },
+    "tower": ["128.100", "257.100"],
+    "runways": [
+      {
+        "runway": "05R",
+        "tacan": null,
+        "heading": 39,
+        "ils": null
+      },
+      {
+        "runway": "23L",
+        "tacan": null,
+        "heading": 219,
+        "ils": null
+      }
+    ]
+  },
+  {
+    "icao": "URKA",
+    "name": "Anapa-Vítiazevo",
+    "tacan": {
+      "channel": "30X",
+      "ident": "ANV"
+    },
+    "tower": ["121.100", "250.100"],
+    "runways": [
+      {
+        "runway": "04",
+        "tacan": null,
+        "heading": 33,
+        "ils": null
+      },
+      {
+        "runway": "22",
+        "tacan": null,
+        "heading": 213,
+        "ils": null
+      }
+    ]
+  }
+]

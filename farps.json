@@ -1,0 +1,44 @@
+[
+  {
+    "id": "dallas",
+    "name": "FARP Dallas",
+    "type": "Helicopter FARP",
+    "frequency": "124.100",
+    "location": {
+      "description": "Biketi",
+      "tacan": {
+        "channel": "12X",
+        "ident": "BKT"
+      },
+      "reference": "45 nm W Tiflis"
+    },
+    "notes": []
+  },
+  {
+    "id": "madrid",
+    "name": "FARP Madrid",
+    "type": "Helicopter FARP",
+    "frequency": "124.200",
+    "location": {
+      "description": "Biketi",
+      "tacan": {
+        "channel": "12X",
+        "ident": "BKT"
+      },
+      "reference": "45 nm W Tiflis"
+    },
+    "notes": []
+  },
+  {
+    "id": "vaziani",
+    "name": "FARP Vaziani",
+    "type": "Helicopter FARP",
+    "frequency": "140.100",
+    "location": {
+      "reference": "2 nm NE Vaziani"
+    },
+    "notes": [
+      "Al salir o llegar, atravesar Vaziani perpendicularmente por la mitad de la pista a 500 ft AGL para evitar interferencias con el tráfico del aeropuerto."
+    ]
+  }
+]

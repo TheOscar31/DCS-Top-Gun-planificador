@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Meteo DCS</title>
+
+<style>
+body{
+    font-family: Arial, sans-serif;
+    background:#1e1e1e;
+    color:white;
+    margin:20px;
+}
+
+.card{
+    max-width:800px;
+    margin:auto;
+    background:#2a2a2a;
+    padding:20px;
+    border-radius:10px;
+}
+
+h2{
+    margin-top:0;
+    color:#4da6ff;
+}
+
+.grid{
+    display:grid;
+    grid-template-columns:250px 1fr;
+    gap:10px;
+    align-items:center;
+}
+
+input,select{
+    padding:8px;
+    border-radius:5px;
+    border:none;
+    font-size:16px;
+}
+
+.result{
+    margin-top:25px;
+    padding:15px;
+    background:#111;
+    border-radius:8px;
+}
+
+.output{
+    font-family:Consolas, monospace;
+    font-size:20px;
+    color:#66ff66;
+    margin-top:10px;
+}
+
+label{
+    font-weight:bold;
+}
+</style>
+
+</head>
+<body>
+
+<div class="card">
+
+<h2>🌦️ Meteorología</h2>
+
+<div class="grid">
+
+<label>De dónde viene</label>
+<input id="windFrom" type="number" min="0" max="359" value="358">
+
+<label>Hacia dónde va</label>
+<div id="windTo">178°</div>
+
+<label>Velocidad</label>
+<input id="windSpeed" type="number" min="0" max="99" value="5">
+
+<label>Primera capa</label>
+<div>
+    <select id="cloud1Type">
+        <option>FEW</option>
+        <option>SCT</option>
+        <option selected>BKN</option>
+        <option>OVC</option>
+    </select>
+
+    <input id="cloud1Alt" type="number" value="19000" style="width:120px">
+</div>
+
+<label>Segunda capa</label>
+<div>
+    <select id="cloud2Type">
+        <option selected>FEW</option>
+        <option>SCT</option>
+        <option>BKN</option>
+        <option>OVC</option>
+    </select>
+
+    <input id="cloud2Alt" type="number" value="37000" style="width:120px">
+</div>
+
+<label>Tercera capa</label>
+<div>
+    <select id="cloud3Type">
+        <option selected>FEW</option>
+        <option>SCT</option>
+        <option>BKN</option>
+        <option>OVC</option>
+    </select>
+
+    <input id="cloud3Alt" type="number" value="40000" style="width:120px">
+</div>
+
+<label>QNH (inHg)</label>
+<input id="qnh" type="number" step="0.01" value="29.86">
+
+</div>
+
+
+
+<div class="result">
+
+<h3>Resultado</h3>
+
+<div id="qnhHpa"></div>
+
+<div class="output" id="weatherString">
+358º 05KT BKN190 FEW370 FEW400 Q1011,18
+</div>
+
+</div>
+
+</div>
+
+<script>
+
+const inputs = document.querySelectorAll('input, select');
+
+inputs.forEach(i=>{
+    i.addEventListener('input',updateWeather);
+});
+
+function updateWeather(){
+
+    const windFrom =
+        parseInt(document.getElementById('windFrom').value)||0;
+
+    const windTo =
+        (windFrom + 180) % 360;
+
+    document.getElementById('windTo').innerHTML =
+        windTo.toString().padStart(3,'0') + "°";
+
+    const speed =
+        parseInt(document.getElementById('windSpeed').value)||0;
+
+    const cloud1Type =
+        document.getElementById('cloud1Type').value;
+
+    const cloud2Type =
+        document.getElementById('cloud2Type').value;
+
+    const cloud3Type =
+        document.getElementById('cloud3Type').value;
+
+    const cloud1Alt =
+        Math.round(
+            (parseInt(document.getElementById('cloud1Alt').value)||0)/100
+        );
+
+    const cloud2Alt =
+        Math.round(
+            (parseInt(document.getElementById('cloud2Alt').value)||0)/100
+        );
+
+    const cloud3Alt =
+        Math.round(
+            (parseInt(document.getElementById('cloud3Alt').value)||0)/100
+        );
+
+    const qnhInHg =
+        parseFloat(document.getElementById('qnh').value)||29.92;
+
+    const qnhHpa =
+        (qnhInHg * 33.8639);
+
+    document.getElementById('qnhHpa').innerHTML =
+        "QNH: " +
+        qnhInHg.toFixed(2) +
+        " inHg (" +
+        qnhHpa.toFixed(2) +
+        " hPa)";
+
+    const weatherString =
+        windFrom.toString().padStart(3,'0') +
+        "º " +
+        speed.toString().padStart(2,'0') +
+        "KT " +
+        cloud1Type +
+        cloud1Alt +
+        " " +
+        cloud2Type +
+        cloud2Alt +
+        " " +
+        cloud3Type +
+        cloud3Alt +
+        " Q" +
+        qnhHpa.toFixed(2).replace(".",",");
+
+    document.getElementById('weatherString').innerHTML =
+        weatherString;
+}
+
+updateWeather();
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,174 @@
+{
+  "radio1": {
+    "name": "Grupo",
+    "defaultPurpose": "Frecuencia interna de grupo",
+    "channels": [
+      {
+        "channel": 1,
+        "name": "GRP",
+        "frequency": "VARIABLE",
+        "description": "Frecuencia interna del grupo seleccionado"
+      },
+      {
+        "channel": "G",
+        "name": "GUARD",
+        "frequency": "243.000",
+        "description": "Frecuencia de guardia"
+      }
+    ]
+  },
+
+  "radio2": {
+    "name": "Comunes",
+    "defaultPurpose": "ATC, Tankers, Polígonos y Carriers",
+
+    "channels": [
+      {
+        "channel": 1,
+        "name": "TFL",
+        "frequency": "138.100",
+        "description": "Tiflis-Lochini"
+      },
+
+      {
+        "channel": 2,
+        "name": "GRL",
+        "frequency": "251.100",
+        "description": "Frecuencia común general"
+      },
+
+      {
+        "channel": 3,
+        "name": "CTR",
+        "frequency": "127.100",
+        "description": "Roosevelt CVN-71"
+      },
+
+      {
+        "channel": 4,
+        "name": "CJS",
+        "frequency": "127.400",
+        "description": "Stennis CVN-74"
+      },
+
+      {
+        "channel": 5,
+        "name": "ZT1",
+        "frequency": "253.100",
+        "description": "Polígono ZT1"
+      },
+
+      {
+        "channel": 6,
+        "name": "ZT2",
+        "frequency": "253.200",
+        "description": "Polígono ZT2"
+      },
+
+      {
+        "channel": 7,
+        "name": "ZT3",
+        "frequency": "253.300",
+        "description": "Polígono ZT3"
+      },
+
+      {
+        "channel": 8,
+        "name": "TX1",
+        "frequency": "235.200",
+        "description": "Texaco 1-1"
+      },
+
+      {
+        "channel": 9,
+        "name": "NV1",
+        "frequency": "235.300",
+        "description": "Navy One 1-1"
+      },
+
+      {
+        "channel": 10,
+        "name": "AR1",
+        "frequency": "235.400",
+        "description": "Arco 1-1"
+      },
+
+      {
+        "channel": 11,
+        "name": "AR2",
+        "frequency": "235.500",
+        "description": "Arco 2-1"
+      },
+
+      {
+        "channel": 12,
+        "name": "TX2",
+        "frequency": "235.250",
+        "description": "Texaco 2-1"
+      },
+
+      {
+        "channel": 13,
+        "name": "DRN1",
+        "frequency": "254.100",
+        "description": "Polígono DRN1"
+      },
+
+      {
+        "channel": 14,
+        "name": "DRN2",
+        "frequency": "254.200",
+        "description": "Polígono DRN2"
+      },
+
+      {
+        "channel": 15,
+        "name": "DFT1",
+        "frequency": "255.100",
+        "description": "Polígono DFT1"
+      },
+
+      {
+        "channel": 16,
+        "name": "OVL1",
+        "frequency": "251.500",
+        "description": "Overlord 1-1"
+      },
+
+      {
+        "channel": 17,
+        "name": "MGC2",
+        "frequency": "251.600",
+        "description": "Magic 2-1"
+      },
+
+      {
+        "channel": 18,
+        "name": "CH18",
+        "frequency": "260.000",
+        "description": ""
+      },
+
+      {
+        "channel": 19,
+        "name": "CH19",
+        "frequency": "263.000",
+        "description": ""
+      },
+
+      {
+        "channel": 20,
+        "name": "CH20",
+        "frequency": "266.000",
+        "description": ""
+      },
+
+      {
+        "channel": "G",
+        "name": "GUARD",
+        "frequency": "243.000",
+        "description": "Frecuencia de guardia"
+      }
+    ]
+  }
+}

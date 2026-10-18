@@ -1,0 +1,26 @@
+[
+  {
+    "id": "cvn71",
+    "name": "Roosevelt CVN-71",
+    "type": "Supercarrier",
+    "radio": "127.100",
+    "tacan": {
+      "channel": "71X",
+      "ident": "NTR"
+    },
+    "icls": 11,
+    "link4": "336.100"
+  },
+  {
+    "id": "cvn74",
+    "name": "Stennis CVN-74",
+    "type": "Carrier",
+    "radio": "127.400",
+    "tacan": {
+      "channel": "74X",
+      "ident": "JCS"
+    },
+    "icls": 14,
+    "link4": "336.400"
+  }
+]

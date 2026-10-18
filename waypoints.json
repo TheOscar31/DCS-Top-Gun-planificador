@@ -1,0 +1,149 @@
+[
+  {
+    "wp": 0,
+    "name": "START",
+    "coordinates": null,
+    "elevation_ft": null,
+    "description": "Posición de inicio"
+  },
+  {
+    "wp": 1,
+    "name": "TFL",
+    "coordinates": {
+      "lat": "N41°40'02\"",
+      "lon": "E44°57'21\""
+    },
+    "elevation_ft": 1575,
+    "description": "Tiflis"
+  },
+  {
+    "wp": 2,
+    "name": "KPE",
+    "coordinates": {
+      "lat": "N45°02'18\"",
+      "lon": "E39°11'19\""
+    },
+    "elevation_ft": 112,
+    "description": "Krasnodar Pashkovsky Este"
+  },
+  {
+    "wp": 3,
+    "name": "GLN",
+    "coordinates": {
+      "lat": "N44°34'23\"",
+      "lon": "E38°00'42\""
+    },
+    "elevation_ft": 72,
+    "description": "Gelendzhik"
+  },
+  {
+    "wp": 4,
+    "name": "OTB1",
+    "coordinates": {
+      "lat": "N43°38'41\"",
+      "lon": "E44°27'03\""
+    },
+    "elevation_ft": 630,
+    "description": "Outbase 1"
+  },
+  {
+    "wp": 5,
+    "name": "OTB2",
+    "coordinates": {
+      "lat": "N41°58'00\"",
+      "lon": "E43°31'06\""
+    },
+    "elevation_ft": 2362,
+    "description": "Outbase 2"
+  },
+  {
+    "wp": 6,
+    "name": "DRN1",
+    "coordinates": {
+      "lat": "N46°04'00\"",
+      "lon": "E36°56'53\""
+    },
+    "elevation_ft": 20000,
+    "description": "Polígono DRN1"
+  },
+  {
+    "wp": 7,
+    "name": "DRN2",
+    "coordinates": {
+      "lat": "N40°52'37\"",
+      "lon": "E44°44'01\""
+    },
+    "elevation_ft": 20000,
+    "description": "Polígono DRN2"
+  },
+  {
+    "wp": 8,
+    "name": "DFT1",
+    "coordinates": {
+      "lat": "N42°45'48\"",
+      "lon": "E40°48'39\""
+    },
+    "elevation_ft": 17000,
+    "description": "Zona Dogfight 1"
+  },
+  {
+    "wp": 9,
+    "name": "ZT1",
+    "coordinates": {
+      "lat": "N41°15'33\"",
+      "lon": "E45°17'03\""
+    },
+    "elevation_ft": 984,
+    "description": "Polígono ZT1"
+  },
+  {
+    "wp": 10,
+    "name": "ZT2",
+    "coordinates": {
+      "lat": "N41°56'33\"",
+      "lon": "E45°24'23\""
+    },
+    "elevation_ft": 5190,
+    "description": "Polígono ZT2"
+  },
+  {
+    "wp": 11,
+    "name": "ZT3",
+    "coordinates": {
+      "lat": "N45°18'58\"",
+      "lon": "E37°45'06\""
+    },
+    "elevation_ft": 39,
+    "description": "Polígono ZT3"
+  },
+  {
+    "wp": 12,
+    "name": "TK1",
+    "coordinates": {
+      "lat": "N41°59'06\"",
+      "lon": "E44°12'44\""
+    },
+    "elevation_ft": 22000,
+    "description": "Tankers Centro"
+  },
+  {
+    "wp": 13,
+    "name": "TK2",
+    "coordinates": {
+      "lat": "N44°20'50\"",
+      "lon": "E40°29'21\""
+    },
+    "elevation_ft": 22000,
+    "description": "Tankers Maykop"
+  },
+  {
+    "wp": 14,
+    "name": "BULLS",
+    "coordinates": {
+      "lat": "N42°36'14\"",
+      "lon": "E42°11'46\""
+    },
+    "elevation_ft": null,
+    "description": "Bullseye"
+  }
+]
