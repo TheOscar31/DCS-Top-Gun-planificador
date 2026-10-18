@@ -1,6 +1,6 @@
 [
   {
-    "id": "cvn71",
+    "id": "CVN71",
     "name": "Roosevelt CVN-71",
     "type": "Supercarrier",
     "radio": "127.100",
@@ -12,7 +12,7 @@
     "link4": "336.100"
   },
   {
-    "id": "cvn74",
+    "id": "CVN74",
     "name": "Stennis CVN-74",
     "type": "Carrier",
     "radio": "127.400",
