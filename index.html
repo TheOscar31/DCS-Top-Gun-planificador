@@ -5,6 +5,9 @@
 
 <meta charset="UTF-8">
 
+<meta name="viewport"
+      content="width=device-width, initial-scale=1">
+
 <title>DCS Operations Center</title>
 
 <link rel="stylesheet" href="main.css">
@@ -19,47 +22,117 @@
 
 </header>
 
-<nav>
+<div class="container">
 
-<button onclick="showPage('planner')">
-Planificador
+<section class="card">
+
+<h2>1. Origen</h2>
+
+<select id="unitType">
+
+<option value="airport">
+Aeropuerto
+</option>
+
+<option value="carrier">
+Carrier
+</option>
+
+<option value="farp">
+FARP
+</option>
+
+<option value="outbase">
+Outbase
+</option>
+
+</select>
+
+<select id="unitSelector">
+</select>
+
+</section>
+
+<section class="card">
+
+<h2>2. Grupo</h2>
+
+<select id="groupSelector">
+</select>
+
+</section>
+
+<section class="card">
+
+<h2>3. Activos</h2>
+
+<div class="split">
+
+<div>
+
+<h3>Tankers</h3>
+
+<div id="tankersContainer"></div>
+
+</div>
+
+<div>
+
+<h3>Polígonos</h3>
+
+<div id="rangesContainer"></div>
+
+</div>
+
+</div>
+
+</section>
+
+<section class="card">
+
+<h2>4. Waypoints</h2>
+
+<div id="waypointsContainer">
+</div>
+
+<button id="addWaypoint">
+Añadir Waypoint
 </button>
 
-<button onclick="showPage('airports')">
-Aeropuertos
+</section>
+
+<section class="card">
+
+<h2>5. Meteo</h2>
+
+<iframe
+    src="weather.html"
+    width="100%"
+    height="700"
+    frameborder="0">
+</iframe>
+
+</section>
+
+<section class="card">
+
+<h2>6. Piernógrafo</h2>
+
+<button id="generateButton">
+
+Generar
+
 </button>
 
-<button onclick="showPage('carriers')">
-Carriers
-</button>
+<pre id="kneeboardPreview">
 
-<button onclick="showPage('tankers')">
-Tankers
-</button>
+</pre>
 
-<button onclick="showPage('ranges')">
-Polígonos
-</button>
+</section>
 
-<button onclick="showPage('farps')">
-FARPs
-</button>
+</div>
 
-<button onclick="showPage('groups')">
-Grupos
-</button>
-
-<button onclick="showPage('weather')">
-Meteo
-</button>
-
-</nav>
-
-<main id="content">
-
-</main>
-
-<script type="module" src="app.js"></script>
+<script type="module" src="apps.js"></script>
 
 </body>
 
