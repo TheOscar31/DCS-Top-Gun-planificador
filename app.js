@@ -1,22 +1,50 @@
-import { loadDatabase }
-from "./loader.js";
+import { loadDatabase } from "./loader.js";
 
-window.db =
-    await loadDatabase();
+let db = {};
 
-window.showPage =
-async function(page){
+async function init() {
+    try {
 
-    const target =
-        document.getElementById("content");
+        db = await loadDatabase();
 
-    const html =
-        await fetch(
-            `${page}.html`
-        ).then(r=>r.text());
+        window.db = db;
 
-    target.innerHTML = html;
+        console.log("Base de datos cargada");
 
+        window.showPage = async function(page) {
+
+            const target =
+                document.getElementById("content");
+
+            const response =
+                await fetch(`${page}.html`);
+
+            if (!response.ok) {
+
+                target.innerHTML = `
+                    <h2>${page}</h2>
+                    <p>Página todavía no creada.</p>
+                `;
+
+                return;
+            }
+
+            const html =
+                await response.text();
+
+            target.innerHTML = html;
+        };
+
+        showPage("planner");
+
+    }
+    catch(error) {
+
+        console.error(error);
+
+        document.getElementById("content").innerHTML =
+            `<pre>${error}</pre>`;
+    }
 }
 
-showPage("planner");
+init();
