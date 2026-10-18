@@ -181,14 +181,80 @@ function exportCsv() {
   const csv = exportRows().map((row) => row.map((cell) => `"${String(cell ?? "").replaceAll('"', '""')}"`).join(";")).join("\r\n");
   downloadBlob(new Blob(["\ufeff" + csv], { type: "text/csv;charset=utf-8" }), "plan_vuelo_dcs.csv");
 }
-function exportXlsx() {
-  if (!window.XLSX) { alert("No se pudo cargar el generador XLSX. Usa CSV o comprueba la conexión."); return; }
-  const worksheet = XLSX.utils.aoa_to_sheet(exportRows());
-  worksheet["!cols"] = [{ wch: 18 }, { wch: 22 }, { wch: 24 }, { wch: 28 }];
-  const workbook = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(workbook, worksheet, "Plan de vuelo");
-  XLSX.writeFile(workbook, "plan_vuelo_dcs.xlsx");
+async function exportXlsx() {
+  try {
+    if (!window.XlsxPopulate) throw new Error("No se ha cargado la biblioteca de Excel");
+    const response = await fetch("./piernografo_base.xlsx?v=3.0", { cache: "no-store" });
+    if (!response.ok) throw new Error(`No se pudo cargar la plantilla (${response.status})`);
+    const data = missionData();
+    const workbook = await XlsxPopulate.fromDataAsync(await response.arrayBuffer());
+    const sheet = workbook.sheet("Plan de vuelo") || workbook.sheet(0);
+
+    ["C3","C4","C6","H7"].forEach(c => sheet.cell(c).value(""));
+    ["C7:C10","E7:E10","F7:F10","C14:C25","D14:D25","E14:E25"].forEach(r => sheet.range(r).value(""));
+
+    if (data.origin) {
+      sheet.cell("C3").value(data.origin.name || data.origin.callsign || data.origin.icao || data.origin.id || "");
+      sheet.cell("C4").value(originExcelLine(data.origin));
+    }
+    if (data.group) {
+      const callsign=data.group.callsign || data.group.id || "";
+      const kind=groupSize(data.group)===2 ? "Binomio" : "Grupo";
+      sheet.cell("C6").value(`${kind} ${callsign}  -  ${normalizeFrequency(data.group.frequency)} MHz`);
+      data.pilots.slice(0,4).forEach((pilot,index) => {
+        const row=7+index;
+        sheet.cell(`C${row}`).value(`${callsign} ${pilot.position}`);
+        sheet.cell(`E${row}`).value(pilot.pilot);
+        sheet.cell(`F${row}`).value(pilot.numeral);
+      });
+      sheet.cell("H7").value(wingFor(callsign));
+    }
+    data.waypoints.slice(0,12).forEach((wp,index) => {
+      const row=14+index;
+      sheet.cell(`C${row}`).value(wp.number || index+1);
+      sheet.cell(`D${row}`).value(wp.name || "");
+      sheet.cell(`E${row}`).value(excelAltitude(wp.altitude));
+    });
+    const blob=await workbook.outputAsync({type:"blob"});
+    downloadBlob(blob,`piernografo_${fileKey(data.group?.callsign || "grupo")}.xlsx`);
+  } catch (error) {
+    console.error(error);
+    alert(`No se pudo generar el piernógrafo XLSX: ${error.message}`);
+  }
 }
+
+function originExcelLine(origin) {
+  const parts=[];
+  if (Array.isArray(origin.tower) && origin.tower.length) parts.push(`Torre: ${origin.tower.join(" / ")} MHz`);
+  else if (origin.radio || origin.frequency) parts.push(`Radio: ${normalizeFrequency(origin.radio || origin.frequency)} MHz`);
+  if (Array.isArray(origin.runways)) origin.runways.forEach(r => parts.push(`${r.runway || r.name || "RWY"}: ${r.heading == null ? "Rumbo -" : String(r.heading).padStart(3,"0")+"º"} / TACAN ${formatTacan(r.tacan)}`));
+  else {
+    const tacan=formatTacan(origin.tacan); if(tacan!=="-") parts.push(`TACAN: ${tacan}`);
+    if(origin.icls!=null) parts.push(`ICLS: CH ${origin.icls}`);
+    if(origin.link4) parts.push(`Link 4: ${normalizeFrequency(origin.link4)} MHz`);
+  }
+  return parts.join("  -  ");
+}
+function wingFor(callsign) {
+  const n=fileKey(callsign);
+  if(/^(tenis|poker)/.test(n)) return "Ala 12";
+  if(/^(toro|marte|ebro)/.test(n)) return "Ala 15";
+  if(/^nikel/.test(n)) return "VMFA 122";
+  if(/^check/.test(n)) return "VMFA 312";
+  if(/^joker/.test(n)) return "VFA-34";
+  if(/^blade/.test(n)) return "VMFA-112";
+  if(/^aggress?or4/.test(n)) return "64th Aggressor Squadron";
+  if(/^aggress?or3/.test(n)) return "VFC-12";
+  if(/^aggress?or2/.test(n)) return "NSAWC";
+  return "";
+}
+function excelAltitude(value) {
+  if(value==null || value==="") return "";
+  const n=Number(String(value).replace(/\./g,"").replace(/,/g,"."));
+  return Number.isFinite(n) ? n : value;
+}
+function fileKey(value) { return String(value||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9]/g,""); }
+
 function downloadBlob(blob, filename) { const url = URL.createObjectURL(blob); const link = document.createElement("a"); link.href = url; link.download = filename; link.click(); URL.revokeObjectURL(url); }
 function showDetails(id, lines) { $(id).innerHTML = lines.map((line, index) => index === 0 ? `<strong>${escapeHtml(line)}</strong>` : `<span>${escapeHtml(line)}</span>`).join(""); }
 function extractCoordinates(item) { const c = item.coordinates ?? item.position; if (!c) return ""; if (typeof c === "string") return c; return [c.lat ?? c.latitude, c.lon ?? c.lng ?? c.longitude].filter(Boolean).join(" "); }

@@ -4,8 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>DCS Operations Center</title>
-  <link rel="stylesheet" href="./main.css?v=2.0">
-  <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+  <link rel="stylesheet" href="./main.css?v=3.0">
+  <script src="https://cdn.jsdelivr.net/npm/xlsx-populate/browser/xlsx-populate.min.js"></script>
 </head>
 <body>
 <header class="site-header">
@@ -57,7 +57,7 @@
 
   <section class="card summary-card">
     <div class="step-title"><span>5</span><div><h2>Resumen para piernógrafo</h2><p>Incluye únicamente aeronaves con piloto asignado.</p></div></div>
-    <div class="action-row"><button id="updateSummary" class="primary" type="button">Actualizar resumen</button><button id="exportCsv" type="button">Descargar CSV</button><button id="exportXlsx" type="button">Descargar XLSX</button></div>
+    <div class="action-row"><button id="updateSummary" class="primary" type="button">Actualizar resumen</button><button id="exportCsv" type="button">Descargar CSV</button><button id="exportXlsx" type="button">Generar piernógrafo XLSX</button></div>
     <pre id="missionSummary"></pre>
   </section>
 </main>
@@ -70,6 +70,6 @@
     <div class="wp-manual-fields hidden"><label>Nombre<input class="wp-name" maxlength="20" placeholder="IP NORTH"></label><label>Latitud<input class="wp-lat" placeholder="N42°15'00&quot;"></label><label>Longitud<input class="wp-lon" placeholder="E43°55'00&quot;"></label><label>Altitud (ft)<input class="wp-alt" type="number" min="0" placeholder="12000"></label></div>
   </article>
 </template>
-<script type="module" src="./app.js?v=2.0"></script>
+<script type="module" src="./app.js?v=3.0"></script>
 </body>
 </html>
