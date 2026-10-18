@@ -38,7 +38,6 @@ function bindEvents() {
   });
   ["windFrom", "windSpeed", "cloud1Type", "cloud1Alt", "cloud2Type", "cloud2Alt", "cloud3Type", "cloud3Alt", "qnhInHg"].forEach((id) => $(id).addEventListener("input", () => { updateWeather(); updateSummary(); }));
   $("updateSummary").addEventListener("click", updateSummary);
-  $("exportCsv").addEventListener("click", exportCsv);
   $("exportXlsx").addEventListener("click", exportXlsx);
 }
 
@@ -145,9 +144,9 @@ function renderWaypointRows() {
 function readWaypoints() {
   const catalog = waypointCatalog();
   return [...document.querySelectorAll(".waypoint-row")].map((row, index) => {
-    if (row.querySelector(".wp-mode").value === "manual") return { number: index + 1, name: row.querySelector(".wp-name").value.trim() || "MANUAL", coordinates: [row.querySelector(".wp-lat").value.trim(), row.querySelector(".wp-lon").value.trim()].filter(Boolean).join(" "), altitude: row.querySelector(".wp-alt").value.trim() };
+    if (row.querySelector(".wp-mode").value === "manual") return { number: index + 1, name: row.querySelector(".wp-name").value.trim() || "MANUAL", excelName: row.querySelector(".wp-name").value.trim() || "MANUAL", coordinates: [row.querySelector(".wp-lat").value.trim(), row.querySelector(".wp-lon").value.trim()].filter(Boolean).join(" "), altitude: row.querySelector(".wp-alt").value.trim() };
     const item = catalog.find((entry) => entry.id === row.querySelector(".wp-preset").value);
-    return { number: index + 1, name: item?.raw?.name ?? item?.raw?.callsign ?? "-", coordinates: item ? extractCoordinates(item.raw) : "", altitude: item?.raw?.elevation_ft ?? item?.raw?.altitude_ft ?? item?.raw?.altitude ?? "" };
+    return { number: index + 1, name: item?.raw?.name ?? item?.raw?.callsign ?? "-", excelName: item ? waypointExcelName(item) : "-", coordinates: item ? extractCoordinates(item.raw) : "", altitude: item?.raw?.elevation_ft ?? item?.raw?.altitude_ft ?? item?.raw?.altitude ?? "" };
   });
 }
 function readPilots() { return [...document.querySelectorAll(".pilot-name")].filter((input) => input.value.trim()).map((input) => ({ pilot: input.value.trim(), position: input.dataset.position, numeral: input.dataset.numeral })); }
@@ -212,11 +211,12 @@ async function exportXlsx() {
     data.waypoints.slice(0,12).forEach((wp,index) => {
       const row=14+index;
       sheet.cell(`C${row}`).value(wp.number || index+1);
-      sheet.cell(`D${row}`).value(wp.name || "");
+      sheet.cell(`D${row}`).value(wp.excelName || wp.name || "");
       sheet.cell(`E${row}`).value(excelAltitude(wp.altitude));
     });
     const blob=await workbook.outputAsync({type:"blob"});
     downloadBlob(blob,`piernografo_${fileKey(data.group?.callsign || "grupo")}.xlsx`);
+    generatePiernografoJpg(data);
   } catch (error) {
     console.error(error);
     alert(`No se pudo generar el piernógrafo XLSX: ${error.message}`);
@@ -224,104 +224,80 @@ async function exportXlsx() {
 }
 
 function originExcelLine(origin) {
-
-    /*
-     * AEROPUERTOS
-     *
-     * Ejemplo:
-     * 13R: 121º 81X   /   31L: 301º 82X
-     */
-
-    if (
-        Array.isArray(origin.runways) &&
-        origin.runways.length > 0
-    ) {
-        return origin.runways
-            .map((runway) => {
-
-                const runwayName = String(
-                    runway.runway ??
-                    runway.name ??
-                    ""
-                )
-                    .replace(/^RWY\s*/i, "")
-                    .trim();
-
-                const heading =
-                    runway.heading !== null &&
-                    runway.heading !== undefined
-                        ? `${String(runway.heading).padStart(3, "0")}º`
-                        : "-";
-
-                const tacan =
-                    formatTacan(runway.tacan);
-
-                return [
-                    runwayName
-                        ? `${runwayName}:`
-                        : "",
-
-                    heading,
-
-                    tacan !== "-"
-                        ? tacan
-                        : ""
-                ]
-                    .filter(Boolean)
-                    .join(" ");
-            })
-            .join("   /   ");
-    }
-
-
-    /*
-     * PORTAAVIONES
-     *
-     * Ejemplo:
-     * 127.100 MHz / 71X NTR / ICLS: CH 11 /
-     * Link 4: 336.100 MHz
-     */
-
-    const carrierData = [];
-
-    const radio =
-        origin.radio ??
-        origin.frequency;
-
-    if (radio) {
-        carrierData.push(
-            `${normalizeFrequency(radio)} MHz`
-        );
-    }
-
-    const tacan =
-        formatTacan(origin.tacan);
-
-    if (tacan !== "-") {
-        carrierData.push(tacan);
-    }
-
-    if (
-        origin.icls !== null &&
-        origin.icls !== undefined
-    ) {
-        const icls = String(origin.icls)
-            .replace(/^CH\s*/i, "")
-            .trim();
-
-        carrierData.push(
-            `ICLS: CH ${icls}`
-        );
-    }
-
-    if (origin.link4) {
-        carrierData.push(
-            `Link 4: ${normalizeFrequency(origin.link4)} MHz`
-        );
-    }
-
-    return carrierData.join(" / ");
+  if (Array.isArray(origin.runways) && origin.runways.length) {
+    return origin.runways.map((runway) => {
+      const name=String(runway.runway || runway.name || "").replace(/^RWY\s*/i,"").trim();
+      const heading=runway.heading == null ? "-" : `${String(runway.heading).padStart(3,"0")}º`;
+      const tacan=formatTacan(runway.tacan);
+      return [`${name}:`,heading,tacan === "-" ? "" : tacan].filter(Boolean).join(" ");
+    }).join("   /   ");
+  }
+  const parts=[];
+  const radio=origin.radio || origin.frequency;
+  if(radio) parts.push(`${normalizeFrequency(radio)} MHz`);
+  const tacan=formatTacan(origin.tacan);
+  if(tacan !== "-") parts.push(tacan);
+  if(origin.icls != null) parts.push(`ICLS: CH ${String(origin.icls).replace(/^CH\s*/i,"").trim()}`);
+  if(origin.link4) parts.push(`Link 4: ${normalizeFrequency(origin.link4)} MHz`);
+  return parts.join(" / ");
 }
+
+function waypointExcelName(item) {
+  const raw=item.raw || {};
+  switch(item.category) {
+    case "DTC": return raw.name || `WP${raw.wp ?? ""}`;
+    case "Aeropuerto": return raw.icao || raw.id || raw.name || "";
+    case "Portaaviones": return String(raw.name || raw.id || "").match(/CVN-?\d+/i)?.[0]?.toUpperCase() || raw.id || raw.name || "";
+    case "FARP": return String(raw.name || raw.id || "").replace(/^FARP\s+/i,"").trim();
+    case "Polígono": return raw.id || raw.name || "";
+    case "Tanker": return tankerAbbreviation(raw.callsign || raw.name || raw.id || "");
+    case "Outbase": return raw.tacan?.ident || raw.id || raw.name || "";
+    default: return raw.name || raw.id || "";
+  }
+}
+
+function tankerAbbreviation(value) {
+  const text=String(value);
+  const compact=text.replace(/\s+/g,"");
+  const numbers=(text.match(/\d+/g) || []).join("");
+  if(/^shell/i.test(compact)) return `SH${numbers}`;
+  if(/^texaco/i.test(compact)) return `TXC${numbers}`;
+  if(/^navyone/i.test(compact)) return `NVY${numbers}`;
+  if(/^arco/i.test(compact)) return `ARC${numbers}`;
+  return text;
+}
+
+function generatePiernografoJpg(data) {
+  const canvas=document.createElement("canvas");
+  canvas.width=1600; canvas.height=1050;
+  const ctx=canvas.getContext("2d");
+  ctx.fillStyle="#ffffff"; ctx.fillRect(0,0,canvas.width,canvas.height);
+  ctx.strokeStyle="#111111"; ctx.lineWidth=2; ctx.fillStyle="#111111";
+  ctx.font="bold 34px Arial"; ctx.textAlign="center";
+  ctx.fillText("PIERNÓGRAFO - PLAN DE VUELO",800,55);
+  ctx.textAlign="left";
+  drawBox(ctx,60,85,1480,115);
+  ctx.font="bold 28px Arial"; ctx.fillText(data.origin ? unitName(data.origin) : "-",85,125);
+  ctx.font="22px Arial"; wrapText(ctx,data.origin ? originExcelLine(data.origin) : "-",85,163,1430,27);
+  drawBox(ctx,60,220,1480,155);
+  ctx.font="bold 27px Arial";
+  const formation=data.group ? `${groupSize(data.group)===2?"Binomio":"Grupo"} ${data.group.callsign} - ${normalizeFrequency(data.group.frequency)} MHz` : "-";
+  ctx.fillText(formation,85,260);
+  ctx.font="20px Arial";
+  data.pilots.slice(0,4).forEach((pilot,index)=>ctx.fillText(`${data.group?.callsign || ""} ${pilot.position}   |   ${pilot.pilot}   |   Numeral ${pilot.numeral}`,90,305+index*30));
+  ctx.font="bold 21px Arial"; ctx.fillText(wingFor(data.group?.callsign || ""),1200,260);
+  drawBox(ctx,60,395,1480,530);
+  ctx.font="bold 24px Arial"; ctx.fillText("WP",85,435); ctx.fillText("NOMBRE",190,435); ctx.fillText("ALTITUD",620,435);
+  ctx.beginPath(); ctx.moveTo(60,450); ctx.lineTo(1540,450); ctx.stroke();
+  ctx.font="21px Arial";
+  data.waypoints.slice(0,12).forEach((wp,index)=>{const y=485+index*35;ctx.fillText(String(wp.number),90,y);ctx.fillText(wp.excelName || wp.name || "",190,y);ctx.fillText(wp.altitude ? `${wp.altitude} ft` : "",620,y);});
+  ctx.font="bold 22px Arial"; ctx.fillText(`METEO: ${data.weather || ""}`,75,980);
+  canvas.toBlob((blob)=>{if(blob) downloadBlob(blob,`piernografo_${fileKey(data.group?.callsign || "grupo")}.jpg`);},"image/jpeg",0.94);
+}
+
+function drawBox(ctx,x,y,w,h){ctx.strokeRect(x,y,w,h);}
+function wrapText(ctx,text,x,y,maxWidth,lineHeight){const words=String(text).split(" ");let line="";for(const word of words){const test=line+word+" ";if(ctx.measureText(test).width>maxWidth&&line){ctx.fillText(line,x,y);line=word+" ";y+=lineHeight;}else line=test;}ctx.fillText(line,x,y);}
+
 function wingFor(callsign) {
   const n=fileKey(callsign);
   if(/^(tenis|poker)/.test(n)) return "Ala 12";
