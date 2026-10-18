@@ -267,36 +267,704 @@ function tankerAbbreviation(value) {
   return text;
 }
 
-function generatePiernografoJpg(data) {
-  const canvas=document.createElement("canvas");
-  canvas.width=1600; canvas.height=1050;
-  const ctx=canvas.getContext("2d");
-  ctx.fillStyle="#ffffff"; ctx.fillRect(0,0,canvas.width,canvas.height);
-  ctx.strokeStyle="#111111"; ctx.lineWidth=2; ctx.fillStyle="#111111";
-  ctx.font="bold 34px Arial"; ctx.textAlign="center";
-  ctx.fillText("PIERNÓGRAFO - PLAN DE VUELO",800,55);
-  ctx.textAlign="left";
-  drawBox(ctx,60,85,1480,115);
-  ctx.font="bold 28px Arial"; ctx.fillText(data.origin ? unitName(data.origin) : "-",85,125);
-  ctx.font="22px Arial"; wrapText(ctx,data.origin ? originExcelLine(data.origin) : "-",85,163,1430,27);
-  drawBox(ctx,60,220,1480,155);
-  ctx.font="bold 27px Arial";
-  const formation=data.group ? `${groupSize(data.group)===2?"Binomio":"Grupo"} ${data.group.callsign} - ${normalizeFrequency(data.group.frequency)} MHz` : "-";
-  ctx.fillText(formation,85,260);
-  ctx.font="20px Arial";
-  data.pilots.slice(0,4).forEach((pilot,index)=>ctx.fillText(`${data.group?.callsign || ""} ${pilot.position}   |   ${pilot.pilot}   |   Numeral ${pilot.numeral}`,90,305+index*30));
-  ctx.font="bold 21px Arial"; ctx.fillText(wingFor(data.group?.callsign || ""),1200,260);
-  drawBox(ctx,60,395,1480,530);
-  ctx.font="bold 24px Arial"; ctx.fillText("WP",85,435); ctx.fillText("NOMBRE",190,435); ctx.fillText("ALTITUD",620,435);
-  ctx.beginPath(); ctx.moveTo(60,450); ctx.lineTo(1540,450); ctx.stroke();
-  ctx.font="21px Arial";
-  data.waypoints.slice(0,12).forEach((wp,index)=>{const y=485+index*35;ctx.fillText(String(wp.number),90,y);ctx.fillText(wp.excelName || wp.name || "",190,y);ctx.fillText(wp.altitude ? `${wp.altitude} ft` : "",620,y);});
-  ctx.font="bold 22px Arial"; ctx.fillText(`METEO: ${data.weather || ""}`,75,980);
-  canvas.toBlob((blob)=>{if(blob) downloadBlob(blob,`piernografo_${fileKey(data.group?.callsign || "grupo")}.jpg`);},"image/jpeg",0.94);
+async function generatePiernografoJpg(data) {
+
+    try {
+
+        /*
+         * Carga la imagen obtenida al imprimir el Excel.
+         */
+
+        const background =
+            await loadPiernografoBackground(
+                "./piernografo_base.jpg"
+            );
+
+
+        /*
+         * El canvas utiliza exactamente la misma resolución
+         * de la imagen base.
+         */
+
+        const canvas =
+            document.createElement("canvas");
+
+        canvas.width =
+            background.naturalWidth;
+
+        canvas.height =
+            background.naturalHeight;
+
+        const ctx =
+            canvas.getContext("2d");
+
+
+        /*
+         * Dibuja la hoja de Excel completa como fondo.
+         */
+
+        ctx.drawImage(
+            background,
+            0,
+            0,
+            canvas.width,
+            canvas.height
+        );
+
+
+        /*
+         * Configuración general del texto.
+         */
+
+        ctx.fillStyle = "#000000";
+
+        ctx.textBaseline = "middle";
+
+        ctx.textAlign = "center";
+
+
+        /*
+         * =====================================================
+         * C3: NOMBRE DEL AEROPUERTO O PORTAAVIONES
+         * =====================================================
+         */
+
+        drawTextInExcelCell(
+            ctx,
+            data.origin
+                ? unitName(data.origin)
+                : "",
+            {
+                x: 160,
+                y: 108,
+                width: 1270,
+                height: 48,
+                fontSize: 27,
+                bold: true,
+                align: "center"
+            }
+        );
+
+
+        /*
+         * =====================================================
+         * C4: PISTAS O DATOS DEL PORTAAVIONES
+         * =====================================================
+         */
+
+        drawTextInExcelCell(
+            ctx,
+            data.origin
+                ? originExcelLine(data.origin)
+                : "",
+            {
+                x: 160,
+                y: 156,
+                width: 1270,
+                height: 58,
+                fontSize: 19,
+                bold: false,
+                align: "center"
+            }
+        );
+
+
+        /*
+         * =====================================================
+         * C6: GRUPO Y FRECUENCIA
+         * =====================================================
+         */
+
+        const formationText =
+            data.group
+                ? `${
+                    groupSize(data.group) === 2
+                        ? "Binomio"
+                        : "Grupo"
+                  } ${
+                    data.group.callsign
+                  }  -  ${
+                    normalizeFrequency(
+                        data.group.frequency
+                    )
+                  } MHz`
+                : "";
+
+        drawTextInExcelCell(
+            ctx,
+            formationText,
+            {
+                x: 160,
+                y: 336,
+                width: 1270,
+                height: 44,
+                fontSize: 24,
+                bold: true,
+                align: "center"
+            }
+        );
+
+
+        /*
+         * =====================================================
+         * C7:C10, E7:E10 Y F7:F10
+         *
+         * Solo aparecen pilotos asignados.
+         * =====================================================
+         */
+
+        const pilotRows = [
+            401,
+            443,
+            485,
+            527
+        ];
+
+        data.pilots
+            .slice(0, 4)
+            .forEach((pilot, index) => {
+
+                const centerY =
+                    pilotRows[index];
+
+
+                /*
+                 * C:D - Indicativo y posición.
+                 */
+
+                drawTextInExcelCell(
+                    ctx,
+                    `${
+                        data.group?.callsign ?? ""
+                    } ${
+                        pilot.position
+                    }`,
+                    {
+                        x: 160,
+                        y: centerY - 19,
+                        width: 420,
+                        height: 38,
+                        fontSize: 19,
+                        bold: true,
+                        align: "center"
+                    }
+                );
+
+
+                /*
+                 * E - Piloto.
+                 */
+
+                drawTextInExcelCell(
+                    ctx,
+                    pilot.pilot,
+                    {
+                        x: 580,
+                        y: centerY - 19,
+                        width: 275,
+                        height: 38,
+                        fontSize: 19,
+                        bold: false,
+                        align: "center"
+                    }
+                );
+
+
+                /*
+                 * F:G - Numeral.
+                 */
+
+                drawTextInExcelCell(
+                    ctx,
+                    pilot.numeral,
+                    {
+                        x: 855,
+                        y: centerY - 19,
+                        width: 330,
+                        height: 38,
+                        fontSize: 19,
+                        bold: false,
+                        align: "center"
+                    }
+                );
+            });
+
+
+        /*
+         * =====================================================
+         * H7: ALA O ESCUADRÓN
+         * =====================================================
+         */
+
+        drawTextInExcelCell(
+            ctx,
+            wingFor(
+                data.group?.callsign ?? ""
+            ),
+            {
+                x: 1185,
+                y: 382,
+                width: 245,
+                height: 171,
+                fontSize: 18,
+                bold: true,
+                align: "center",
+                multiline: true
+            }
+        );
+
+
+        /*
+         * =====================================================
+         * C14:C25 - NÚMERO DE WAYPOINT
+         * D14:D25 - NOMBRE ABREVIADO
+         * E14:E25 - ALTITUD
+         * =====================================================
+         */
+
+        const waypointStartY = 666;
+        const waypointRowHeight = 41.1;
+
+        data.waypoints
+            .slice(0, 12)
+            .forEach((waypoint, index) => {
+
+                const y =
+                    waypointStartY +
+                    index * waypointRowHeight;
+
+
+                /*
+                 * Número.
+                 */
+
+                drawTextInExcelCell(
+                    ctx,
+                    String(
+                        waypoint.number ??
+                        index + 1
+                    ),
+                    {
+                        x: 160,
+                        y,
+                        width: 116,
+                        height: waypointRowHeight,
+                        fontSize: 19,
+                        bold: false,
+                        align: "center"
+                    }
+                );
+
+
+                /*
+                 * Nombre abreviado.
+                 */
+
+                drawTextInExcelCell(
+                    ctx,
+                    waypoint.excelName ??
+                    waypoint.name ??
+                    "",
+                    {
+                        x: 276,
+                        y,
+                        width: 304,
+                        height: waypointRowHeight,
+                        fontSize: 19,
+                        bold: false,
+                        align: "center"
+                    }
+                );
+
+
+                /*
+                 * Altitud.
+                 */
+
+                drawTextInExcelCell(
+                    ctx,
+                    waypoint.altitude
+                        ? formatJpgAltitude(
+                            waypoint.altitude
+                          )
+                        : "",
+                    {
+                        x: 580,
+                        y,
+                        width: 275,
+                        height: waypointRowHeight,
+                        fontSize: 19,
+                        bold: false,
+                        align: "center"
+                    }
+                );
+            });
+
+
+        /*
+         * Convierte el resultado completo a JPG.
+         */
+
+        canvas.toBlob(
+            (blob) => {
+
+                if (!blob) {
+                    throw new Error(
+                        "No se pudo crear la imagen."
+                    );
+                }
+
+                const groupName =
+                    fileKey(
+                        data.group?.callsign ??
+                        "grupo"
+                    );
+
+                downloadBlob(
+                    blob,
+                    `piernografo_${
+                        groupName || "grupo"
+                    }.jpg`
+                );
+            },
+            "image/jpeg",
+            0.96
+        );
+
+    } catch (error) {
+
+        console.error(
+            "Error generando el JPG:",
+            error
+        );
+
+        alert(
+            "Se ha generado el XLSX, " +
+            "pero no se ha podido generar el JPG: " +
+            error.message
+        );
+    }
+}
+function loadPiernografoBackground(src) {
+
+    return new Promise(
+        (resolve, reject) => {
+
+            const image =
+                new Image();
+
+            /*
+             * Evita reutilizar una versión antigua
+             * de la imagen guardada en caché.
+             */
+
+            image.src =
+                `${src}?t=${Date.now()}`;
+
+            image.onload =
+                () => resolve(image);
+
+            image.onerror =
+                () => reject(
+                    new Error(
+                        `No se pudo cargar ${src}`
+                    )
+                );
+        }
+    );
 }
 
-function drawBox(ctx,x,y,w,h){ctx.strokeRect(x,y,w,h);}
-function wrapText(ctx,text,x,y,maxWidth,lineHeight){const words=String(text).split(" ");let line="";for(const word of words){const test=line+word+" ";if(ctx.measureText(test).width>maxWidth&&line){ctx.fillText(line,x,y);line=word+" ";y+=lineHeight;}else line=test;}ctx.fillText(line,x,y);}
+
+function drawTextInExcelCell(
+    ctx,
+    text,
+    options
+) {
+
+    const {
+        x,
+        y,
+        width,
+        height,
+        fontSize = 18,
+        bold = false,
+        align = "center",
+        multiline = false
+    } = options;
+
+
+    const value =
+        String(text ?? "").trim();
+
+    if (!value) {
+        return;
+    }
+
+
+    ctx.save();
+
+
+    /*
+     * Recorta el texto dentro del área equivalente
+     * a la celda de Excel.
+     */
+
+    ctx.beginPath();
+
+    ctx.rect(
+        x + 2,
+        y + 2,
+        width - 4,
+        height - 4
+    );
+
+    ctx.clip();
+
+
+    ctx.fillStyle = "#000000";
+
+    ctx.font =
+        `${
+            bold
+                ? "bold "
+                : ""
+        }${fontSize}px Arial`;
+
+    ctx.textBaseline = "middle";
+
+
+    /*
+     * Alineación.
+     */
+
+    let textX;
+
+    if (align === "left") {
+
+        ctx.textAlign = "left";
+
+        textX =
+            x + 8;
+
+    } else if (align === "right") {
+
+        ctx.textAlign = "right";
+
+        textX =
+            x +
+            width -
+            8;
+
+    } else {
+
+        ctx.textAlign = "center";
+
+        textX =
+            x +
+            width / 2;
+    }
+
+
+    /*
+     * Una sola línea.
+     */
+
+    if (!multiline) {
+
+        const fittedFontSize =
+            fitTextToCell(
+                ctx,
+                value,
+                width - 16,
+                fontSize,
+                11,
+                bold
+            );
+
+        ctx.font =
+            `${
+                bold
+                    ? "bold "
+                    : ""
+            }${fittedFontSize}px Arial`;
+
+        ctx.fillText(
+            value,
+            textX,
+            y +
+            height / 2
+        );
+
+        ctx.restore();
+
+        return;
+    }
+
+
+    /*
+     * Varias líneas, utilizado principalmente
+     * para el nombre del ala.
+     */
+
+    const lines =
+        splitTextIntoLines(
+            ctx,
+            value,
+            width - 16
+        );
+
+    const lineHeight =
+        fontSize * 1.15;
+
+    const totalHeight =
+        lines.length *
+        lineHeight;
+
+    let lineY =
+        y +
+        height / 2 -
+        totalHeight / 2 +
+        lineHeight / 2;
+
+    lines.forEach((line) => {
+
+        ctx.fillText(
+            line,
+            textX,
+            lineY
+        );
+
+        lineY +=
+            lineHeight;
+    });
+
+
+    ctx.restore();
+}
+
+
+function fitTextToCell(
+    ctx,
+    text,
+    maximumWidth,
+    startingSize,
+    minimumSize,
+    bold
+) {
+
+    let size =
+        startingSize;
+
+    while (
+        size > minimumSize
+    ) {
+
+        ctx.font =
+            `${
+                bold
+                    ? "bold "
+                    : ""
+            }${size}px Arial`;
+
+        if (
+            ctx.measureText(text).width <=
+            maximumWidth
+        ) {
+            break;
+        }
+
+        size -= 1;
+    }
+
+    return size;
+}
+
+
+function splitTextIntoLines(
+    ctx,
+    text,
+    maximumWidth
+) {
+
+    const words =
+        String(text)
+            .split(/\s+/);
+
+    const lines = [];
+
+    let currentLine = "";
+
+    words.forEach((word) => {
+
+        const testLine =
+            currentLine
+                ? `${currentLine} ${word}`
+                : word;
+
+        if (
+            ctx.measureText(testLine).width >
+            maximumWidth &&
+            currentLine
+        ) {
+
+            lines.push(
+                currentLine
+            );
+
+            currentLine =
+                word;
+
+        } else {
+
+            currentLine =
+                testLine;
+        }
+    });
+
+    if (currentLine) {
+        lines.push(
+            currentLine
+        );
+    }
+
+    return lines;
+}
+
+
+function formatJpgAltitude(value) {
+
+    if (
+        value === null ||
+        value === undefined ||
+        value === ""
+    ) {
+        return "";
+    }
+
+    const numeric =
+        Number(
+            String(value)
+                .replace(/\./g, "")
+                .replace(",", ".")
+        );
+
+    if (
+        Number.isFinite(numeric)
+    ) {
+        return `${
+            numeric.toLocaleString(
+                "es-ES"
+            )
+        } ft`;
+    }
+
+    const text =
+        String(value);
+
+    return /ft/i.test(text)
+        ? text
+        : `${text} ft`;
+}
 
 function wingFor(callsign) {
   const n=fileKey(callsign);
