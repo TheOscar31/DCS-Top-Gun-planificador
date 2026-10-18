@@ -224,16 +224,103 @@ async function exportXlsx() {
 }
 
 function originExcelLine(origin) {
-  const parts=[];
-  if (Array.isArray(origin.tower) && origin.tower.length) parts.push(`Torre: ${origin.tower.join(" / ")} MHz`);
-  else if (origin.radio || origin.frequency) parts.push(`Radio: ${normalizeFrequency(origin.radio || origin.frequency)} MHz`);
-  if (Array.isArray(origin.runways)) origin.runways.forEach(r => parts.push(`${r.runway || r.name || "RWY"}: ${r.heading == null ? "Rumbo -" : String(r.heading).padStart(3,"0")+"º"} / TACAN ${formatTacan(r.tacan)}`));
-  else {
-    const tacan=formatTacan(origin.tacan); if(tacan!=="-") parts.push(`TACAN: ${tacan}`);
-    if(origin.icls!=null) parts.push(`ICLS: CH ${origin.icls}`);
-    if(origin.link4) parts.push(`Link 4: ${normalizeFrequency(origin.link4)} MHz`);
-  }
-  return parts.join("  -  ");
+
+    /*
+     * AEROPUERTOS
+     *
+     * Ejemplo:
+     * 13R: 121º 81X   /   31L: 301º 82X
+     */
+
+    if (
+        Array.isArray(origin.runways) &&
+        origin.runways.length > 0
+    ) {
+        return origin.runways
+            .map((runway) => {
+
+                const runwayName = String(
+                    runway.runway ??
+                    runway.name ??
+                    ""
+                )
+                    .replace(/^RWY\s*/i, "")
+                    .trim();
+
+                const heading =
+                    runway.heading !== null &&
+                    runway.heading !== undefined
+                        ? `${String(runway.heading).padStart(3, "0")}º`
+                        : "-";
+
+                const tacan =
+                    formatTacan(runway.tacan);
+
+                return [
+                    runwayName
+                        ? `${runwayName}:`
+                        : "",
+
+                    heading,
+
+                    tacan !== "-"
+                        ? tacan
+                        : ""
+                ]
+                    .filter(Boolean)
+                    .join(" ");
+            })
+            .join("   /   ");
+    }
+
+
+    /*
+     * PORTAAVIONES
+     *
+     * Ejemplo:
+     * 127.100 MHz / 71X NTR / ICLS: CH 11 /
+     * Link 4: 336.100 MHz
+     */
+
+    const carrierData = [];
+
+    const radio =
+        origin.radio ??
+        origin.frequency;
+
+    if (radio) {
+        carrierData.push(
+            `${normalizeFrequency(radio)} MHz`
+        );
+    }
+
+    const tacan =
+        formatTacan(origin.tacan);
+
+    if (tacan !== "-") {
+        carrierData.push(tacan);
+    }
+
+    if (
+        origin.icls !== null &&
+        origin.icls !== undefined
+    ) {
+        const icls = String(origin.icls)
+            .replace(/^CH\s*/i, "")
+            .trim();
+
+        carrierData.push(
+            `ICLS: CH ${icls}`
+        );
+    }
+
+    if (origin.link4) {
+        carrierData.push(
+            `Link 4: ${normalizeFrequency(origin.link4)} MHz`
+        );
+    }
+
+    return carrierData.join(" / ");
 }
 function wingFor(callsign) {
   const n=fileKey(callsign);
