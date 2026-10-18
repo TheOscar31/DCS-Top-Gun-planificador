@@ -3,112 +3,73 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>DCS Top Gun - Planificador</title>
-  <link rel="stylesheet" href="main.css">
+  <title>DCS Operations Center</title>
+  <link rel="stylesheet" href="./main.css?v=2.0">
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
 </head>
 <body>
-  <header class="site-header">
-    <div>
-      <p class="eyebrow">DCS WORLD</p>
-      <h1>DCS Operations Center</h1>
+<header class="site-header">
+  <div><p class="eyebrow">DCS WORLD</p><h1>DCS Operations Center</h1></div>
+  <span id="dataStatus" class="status">Cargando datos...</span>
+</header>
+<main class="layout">
+  <section class="card">
+    <div class="step-title"><span>1</span><div><h2>Punto de inicio</h2><p>Solo se muestran ubicaciones con formaciones asignadas.</p></div></div>
+    <div class="form-grid two-columns">
+      <label>Tipo de origen<select id="originType"><option value="airport">Aeropuerto</option><option value="carrier">Portaaviones</option><option value="farp">FARP</option><option value="outbase">Outbase</option></select></label>
+      <label>Origen<select id="originSelect"></select></label>
     </div>
-    <span id="dataStatus" class="status">Cargando datos...</span>
-  </header>
+    <div id="originDetails" class="details empty">Selecciona un origen.</div>
+  </section>
 
-  <main class="layout">
-    <section class="card">
-      <div class="step-title"><span>1</span><div><h2>Punto de inicio</h2><p>Solo aparecen ubicaciones con grupos asignados.</p></div></div>
-      <div class="form-grid two-columns">
-        <label>Tipo de origen
-          <select id="originType">
-            <option value="airport">Aeropuerto</option>
-            <option value="carrier">Portaaviones</option>
-            <option value="farp">FARP</option>
-            <option value="outbase">Outbase</option>
-          </select>
-        </label>
-        <label>Origen
-          <select id="originSelect"></select>
-        </label>
-      </div>
-      <div id="originDetails" class="details empty">Selecciona un origen.</div>
-    </section>
+  <section class="card">
+    <div class="step-title"><span>2</span><div><h2>Formación y pilotos</h2><p>Selecciona grupo o binomio, el indicativo y asigna pilotos únicamente a los aviones que vuelen.</p></div></div>
+    <div class="segmented"><button type="button" class="formation-button active" data-size="4">Grupo · 4 aviones</button><button type="button" class="formation-button" data-size="2">Binomio · 2 aviones</button></div>
+    <label>Indicativo disponible<select id="groupSelect"></select></label>
+    <div id="groupDetails" class="details empty">Selecciona una formación.</div>
+    <div id="pilotAssignments" class="pilot-grid"></div>
+  </section>
 
-    <section class="card">
-      <div class="step-title"><span>2</span><div><h2>Grupo de vuelo</h2><p>Elige formación y después un indicativo disponible.</p></div></div>
-      <div class="segmented" role="group" aria-label="Tipo de formación">
-        <button type="button" class="formation-button active" data-size="4">Grupo · 4 aviones</button>
-        <button type="button" class="formation-button" data-size="2">Binomio · 2 aviones</button>
-      </div>
-      <label>Indicativo disponible
-        <select id="groupSelect"></select>
-      </label>
-      <div id="groupDetails" class="details empty">Selecciona un grupo o binomio.</div>
-    </section>
+  <section class="card">
+    <div class="step-title"><span>3</span><div><h2>Plan de waypoints</h2><p>Define la cantidad y elige puntos de la base de datos o introduce puntos manuales.</p></div></div>
+    <label class="compact-label">Número de waypoints<input id="waypointCount" type="number" min="1" max="20" step="1" value="5"></label>
+    <div id="waypointRows" class="waypoint-list"></div>
+  </section>
 
-    <section class="card">
-      <div class="step-title"><span>3</span><div><h2>Plan de waypoints</h2><p>Selecciona cuántos necesitas. Cada punto puede proceder de la base de datos o introducirse manualmente.</p></div></div>
-      <label class="compact-label">Número de waypoints
-        <select id="waypointCount"></select>
-      </label>
-      <div id="waypointRows" class="waypoint-list"></div>
-    </section>
+  <section class="card">
+    <div class="step-title"><span>4</span><div><h2>Meteorología</h2><p>Los cambios se reflejan automáticamente en el resumen.</p></div></div>
+    <div class="form-grid three-columns">
+      <label>Viento desde (°)<input id="windFrom" type="number" min="0" max="359" value="358"></label>
+      <label>Viento hacia<output id="windTo">178°</output></label>
+      <label>Velocidad (KT)<input id="windSpeed" type="number" min="0" max="99" value="5"></label>
+    </div>
+    <div class="cloud-grid">
+      <strong>Capa</strong><strong>Tipo</strong><strong>Altitud (ft)</strong>
+      <span>1</span><select id="cloud1Type"><option value="">Sin capa</option><option>FEW</option><option>SCT</option><option selected>BKN</option><option>OVC</option></select><input id="cloud1Alt" type="number" min="0" step="100" value="19000">
+      <span>2</span><select id="cloud2Type"><option value="">Sin capa</option><option selected>FEW</option><option>SCT</option><option>BKN</option><option>OVC</option></select><input id="cloud2Alt" type="number" min="0" step="100" value="37000">
+      <span>3</span><select id="cloud3Type"><option value="">Sin capa</option><option selected>FEW</option><option>SCT</option><option>BKN</option><option>OVC</option></select><input id="cloud3Alt" type="number" min="0" step="100" value="40000">
+    </div>
+    <div class="form-grid two-columns">
+      <label>QNH (inHg)<input id="qnhInHg" type="number" min="20" max="35" step="0.01" value="29.86"></label>
+      <div class="weather-output"><span>Resultado</span><strong id="weatherString"></strong></div>
+    </div>
+  </section>
 
-    <section class="card">
-      <div class="step-title"><span>4</span><div><h2>Meteorología</h2><p>Se actualiza en tiempo real y queda incluida en el resumen final.</p></div></div>
-      <div class="form-grid three-columns">
-        <label>Viento desde (°)
-          <input id="windFrom" type="number" min="0" max="359" value="358">
-        </label>
-        <label>Viento hacia (automático)
-          <output id="windTo">178°</output>
-        </label>
-        <label>Velocidad (KT)
-          <input id="windSpeed" type="number" min="0" max="99" value="5">
-        </label>
-      </div>
-      <div class="cloud-grid">
-        <strong>Capa</strong><strong>Tipo</strong><strong>Altitud (ft)</strong>
-        <span>1</span><select id="cloud1Type"><option value="">Sin capa</option><option>FEW</option><option>SCT</option><option selected>BKN</option><option>OVC</option></select><input id="cloud1Alt" type="number" min="0" step="100" value="19000">
-        <span>2</span><select id="cloud2Type"><option value="">Sin capa</option><option selected>FEW</option><option>SCT</option><option>BKN</option><option>OVC</option></select><input id="cloud2Alt" type="number" min="0" step="100" value="37000">
-        <span>3</span><select id="cloud3Type"><option value="">Sin capa</option><option selected>FEW</option><option>SCT</option><option>BKN</option><option>OVC</option></select><input id="cloud3Alt" type="number" min="0" step="100" value="40000">
-      </div>
-      <div class="form-grid two-columns">
-        <label>QNH (inHg)
-          <input id="qnhInHg" type="number" min="20" max="35" step="0.01" value="29.86">
-        </label>
-        <div class="weather-output"><span>Resultado</span><strong id="weatherString"></strong></div>
-      </div>
-    </section>
+  <section class="card summary-card">
+    <div class="step-title"><span>5</span><div><h2>Resumen para piernógrafo</h2><p>Incluye únicamente aeronaves con piloto asignado.</p></div></div>
+    <div class="action-row"><button id="updateSummary" class="primary" type="button">Actualizar resumen</button><button id="exportCsv" type="button">Descargar CSV</button><button id="exportXlsx" type="button">Descargar XLSX</button></div>
+    <pre id="missionSummary"></pre>
+  </section>
+</main>
 
-    <section class="card summary-card">
-      <div class="step-title"><span>5</span><div><h2>Resumen para piernógrafo</h2><p>Vista previa con origen, formación, radio, waypoints y meteo.</p></div></div>
-      <button id="updateSummary" type="button" class="primary">Actualizar resumen</button>
-      <pre id="missionSummary"></pre>
-    </section>
-  </main>
-
-  <template id="waypointTemplate">
-    <article class="waypoint-row">
-      <div class="waypoint-number"></div>
-      <label>Modo
-        <select class="wp-mode"><option value="database">Base de datos</option><option value="manual">Manual</option></select>
-      </label>
-      <div class="wp-database-fields">
-        <label>Punto
-          <select class="wp-preset"></select>
-        </label>
-        <div class="wp-info"></div>
-      </div>
-      <div class="wp-manual-fields hidden">
-        <label>Nombre<input class="wp-name" maxlength="20" placeholder="IP NORTH"></label>
-        <label>Latitud<input class="wp-lat" placeholder="N42°15'00\""></label>
-        <label>Longitud<input class="wp-lon" placeholder="E43°55'00\""></label>
-        <label>Altitud (ft)<input class="wp-alt" type="number" min="0" placeholder="12000"></label>
-      </div>
-    </article>
-  </template>
-
-  <script type="module" src="app.js"></script>
+<template id="waypointTemplate">
+  <article class="waypoint-row">
+    <div class="waypoint-number"></div>
+    <label>Modo<select class="wp-mode"><option value="database">Base de datos</option><option value="manual">Manual</option></select></label>
+    <div class="wp-database-fields"><label>Punto<select class="wp-preset"></select></label><div class="wp-info"></div></div>
+    <div class="wp-manual-fields hidden"><label>Nombre<input class="wp-name" maxlength="20" placeholder="IP NORTH"></label><label>Latitud<input class="wp-lat" placeholder="N42°15'00&quot;"></label><label>Longitud<input class="wp-lon" placeholder="E43°55'00&quot;"></label><label>Altitud (ft)<input class="wp-alt" type="number" min="0" placeholder="12000"></label></div>
+  </article>
+</template>
+<script type="module" src="./app.js?v=2.0"></script>
 </body>
 </html>
