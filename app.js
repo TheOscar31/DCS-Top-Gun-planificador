@@ -12,7 +12,7 @@ async function(page){
 
     const html =
         await fetch(
-            `pages/${page}.html`
+            `${page}.html`
         ).then(r=>r.text());
 
     target.innerHTML = html;
