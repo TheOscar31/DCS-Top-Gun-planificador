@@ -224,22 +224,162 @@ async function exportXlsx() {
 }
 
 function originExcelLine(origin) {
-  if (Array.isArray(origin.runways) && origin.runways.length) {
-    return origin.runways.map((runway) => {
-      const name=String(runway.runway || runway.name || "").replace(/^RWY\s*/i,"").trim();
-      const heading=runway.heading == null ? "-" : `${String(runway.heading).padStart(3,"0")}º`;
-      const tacan=formatTacan(runway.tacan);
-      return [`${name}:`,heading,tacan === "-" ? "" : tacan].filter(Boolean).join(" ");
-    }).join("   /   ");
-  }
-  const parts=[];
-  const radio=origin.radio || origin.frequency;
-  if(radio) parts.push(`${normalizeFrequency(radio)} MHz`);
-  const tacan=formatTacan(origin.tacan);
-  if(tacan !== "-") parts.push(tacan);
-  if(origin.icls != null) parts.push(`ICLS: CH ${String(origin.icls).replace(/^CH\s*/i,"").trim()}`);
-  if(origin.link4) parts.push(`Link 4: ${normalizeFrequency(origin.link4)} MHz`);
-  return parts.join(" / ");
+
+    /*
+     * =====================================================
+     * AEROPUERTOS
+     *
+     * Ejemplo:
+     * 138.100 MHz / 267.100 MHz /
+     * 13R: 121º 81X / 31L: 301º 82X
+     * =====================================================
+     */
+
+    if (
+        Array.isArray(origin.runways) &&
+        origin.runways.length > 0
+    ) {
+        const parts = [];
+
+
+        /*
+         * Radios de torre.
+         */
+
+        if (
+            Array.isArray(origin.tower)
+        ) {
+            origin.tower.forEach((frequency) => {
+
+                if (frequency) {
+                    parts.push(
+                        `${normalizeFrequency(frequency)} MHz`
+                    );
+                }
+            });
+
+        } else {
+
+            const radio =
+                origin.radio ??
+                origin.frequency;
+
+            if (radio) {
+                parts.push(
+                    `${normalizeFrequency(radio)} MHz`
+                );
+            }
+        }
+
+
+        /*
+         * Pistas, rumbos y TACAN de cabecera.
+         */
+
+        origin.runways.forEach((runway) => {
+
+            const runwayName =
+                String(
+                    runway.runway ??
+                    runway.name ??
+                    ""
+                )
+                    .replace(/^RWY\s*/i, "")
+                    .trim();
+
+            const heading =
+                runway.heading !== null &&
+                runway.heading !== undefined
+                    ? `${String(runway.heading).padStart(3, "0")}º`
+                    : "-";
+
+            const runwayTacan =
+                formatTacan(runway.tacan);
+
+            const runwayData = [
+                runwayName
+                    ? `${runwayName}:`
+                    : "",
+
+                heading,
+
+                runwayTacan !== "-"
+                    ? runwayTacan
+                    : ""
+            ]
+                .filter(Boolean)
+                .join(" ");
+
+            if (runwayData) {
+                parts.push(runwayData);
+            }
+        });
+
+
+        return parts.join(" / ");
+    }
+
+
+    /*
+     * =====================================================
+     * PORTAAVIONES
+     *
+     * Ejemplo:
+     * 127.100 MHz / 71X NTR /
+     * ICLS: CH 11 / Link 4: 336.100 MHz
+     * =====================================================
+     */
+
+    const carrierData = [];
+
+    const radio =
+        origin.radio ??
+        origin.frequency;
+
+    if (radio) {
+        carrierData.push(
+            `${normalizeFrequency(radio)} MHz`
+        );
+    }
+
+
+    const carrierTacan =
+        formatTacan(origin.tacan);
+
+    if (carrierTacan !== "-") {
+        carrierData.push(
+            carrierTacan
+        );
+    }
+
+
+    if (
+        origin.icls !== null &&
+        origin.icls !== undefined
+    ) {
+        const icls =
+            String(origin.icls)
+                .replace(/^CH\s*/i, "")
+                .trim();
+
+        carrierData.push(
+            `ICLS: CH ${icls}`
+        );
+    }
+
+
+    if (origin.link4) {
+        carrierData.push(
+            `Link 4: ${
+                normalizeFrequency(
+                    origin.link4
+                )
+            } MHz`
+        );
+    }
+
+
+    return carrierData.join(" / ");
 }
 
 function waypointExcelName(item) {
@@ -271,20 +411,11 @@ async function generatePiernografoJpg(data) {
 
     try {
 
-        /*
-         * Carga la imagen obtenida al imprimir el Excel.
-         */
-
         const background =
             await loadPiernografoBackground(
                 "./piernografo_base.jpg"
             );
 
-
-        /*
-         * El canvas utiliza exactamente la misma resolución
-         * de la imagen base.
-         */
 
         const canvas =
             document.createElement("canvas");
@@ -295,12 +426,13 @@ async function generatePiernografoJpg(data) {
         canvas.height =
             background.naturalHeight;
 
+
         const ctx =
             canvas.getContext("2d");
 
 
         /*
-         * Dibuja la hoja de Excel completa como fondo.
+         * Copia exacta de la plantilla exportada desde Excel.
          */
 
         ctx.drawImage(
@@ -312,20 +444,19 @@ async function generatePiernografoJpg(data) {
         );
 
 
-        /*
-         * Configuración general del texto.
-         */
+        ctx.fillStyle =
+            "#000000";
 
-        ctx.fillStyle = "#000000";
-
-        ctx.textBaseline = "middle";
-
-        ctx.textAlign = "center";
+        ctx.textBaseline =
+            "middle";
 
 
         /*
          * =====================================================
-         * C3: NOMBRE DEL AEROPUERTO O PORTAAVIONES
+         * C3:H3
+         *
+         * Nombre del aeropuerto o portaaviones.
+         * Zona superior del primer recuadro.
          * =====================================================
          */
 
@@ -335,11 +466,14 @@ async function generatePiernografoJpg(data) {
                 ? unitName(data.origin)
                 : "",
             {
-                x: 160,
-                y: 108,
-                width: 1270,
-                height: 48,
-                fontSize: 27,
+                x: 72,
+                y: 31,
+                width: 878,
+                height: 39,
+
+                fontSize: 22,
+                minimumFontSize: 13,
+
                 bold: true,
                 align: "center"
             }
@@ -348,7 +482,9 @@ async function generatePiernografoJpg(data) {
 
         /*
          * =====================================================
-         * C4: PISTAS O DATOS DEL PORTAAVIONES
+         * C4:H4
+         *
+         * Radios, pistas, rumbos y TACAN.
          * =====================================================
          */
 
@@ -358,11 +494,14 @@ async function generatePiernografoJpg(data) {
                 ? originExcelLine(data.origin)
                 : "",
             {
-                x: 160,
-                y: 156,
-                width: 1270,
-                height: 58,
-                fontSize: 19,
+                x: 72,
+                y: 70,
+                width: 878,
+                height: 42,
+
+                fontSize: 16,
+                minimumFontSize: 10,
+
                 bold: false,
                 align: "center"
             }
@@ -371,34 +510,42 @@ async function generatePiernografoJpg(data) {
 
         /*
          * =====================================================
-         * C6: GRUPO Y FRECUENCIA
+         * C6:H6
+         *
+         * Grupo o binomio y frecuencia interna.
          * =====================================================
          */
 
-        const formationText =
-            data.group
-                ? `${
-                    groupSize(data.group) === 2
-                        ? "Binomio"
-                        : "Grupo"
-                  } ${
-                    data.group.callsign
-                  }  -  ${
-                    normalizeFrequency(
-                        data.group.frequency
-                    )
-                  } MHz`
-                : "";
+        let formationText = "";
+
+        if (data.group) {
+
+            const formationType =
+                groupSize(data.group) === 2
+                    ? "Binomio"
+                    : "Grupo";
+
+            formationText =
+                `${formationType} ` +
+                `${data.group.callsign}  -  ` +
+                `${normalizeFrequency(
+                    data.group.frequency
+                )} MHz`;
+        }
+
 
         drawTextInExcelCell(
             ctx,
             formationText,
             {
-                x: 160,
-                y: 336,
-                width: 1270,
-                height: 44,
-                fontSize: 24,
+                x: 72,
+                y: 207,
+                width: 878,
+                height: 37,
+
+                fontSize: 20,
+                minimumFontSize: 13,
+
                 bold: true,
                 align: "center"
             }
@@ -407,44 +554,55 @@ async function generatePiernografoJpg(data) {
 
         /*
          * =====================================================
-         * C7:C10, E7:E10 Y F7:F10
+         * C7:C10, E7:E10, F7:F10.
          *
-         * Solo aparecen pilotos asignados.
+         * Los límites observados en el JPG son:
+         *
+         * C:D → x 72 a 318
+         * E   → x 318 a 481
+         * F:G → x 481 a 816
+         * H   → x 816 a 950
          * =====================================================
          */
 
-        const pilotRows = [
-            401,
-            443,
-            485,
-            527
+        const pilotRowCenters = [
+            260,
+            292,
+            325,
+            357
         ];
+
 
         data.pilots
             .slice(0, 4)
             .forEach((pilot, index) => {
 
                 const centerY =
-                    pilotRows[index];
+                    pilotRowCenters[index];
 
 
                 /*
-                 * C:D - Indicativo y posición.
+                 * C:D
+                 * Indicativo completo.
                  */
 
                 drawTextInExcelCell(
                     ctx,
                     `${
-                        data.group?.callsign ?? ""
+                        data.group?.callsign ??
+                        ""
                     } ${
                         pilot.position
                     }`,
                     {
-                        x: 160,
-                        y: centerY - 19,
-                        width: 420,
-                        height: 38,
-                        fontSize: 19,
+                        x: 72,
+                        y: centerY - 16,
+                        width: 246,
+                        height: 32,
+
+                        fontSize: 15,
+                        minimumFontSize: 10,
+
                         bold: true,
                         align: "center"
                     }
@@ -452,18 +610,22 @@ async function generatePiernografoJpg(data) {
 
 
                 /*
-                 * E - Piloto.
+                 * E
+                 * Nombre del piloto.
                  */
 
                 drawTextInExcelCell(
                     ctx,
                     pilot.pilot,
                     {
-                        x: 580,
-                        y: centerY - 19,
-                        width: 275,
-                        height: 38,
-                        fontSize: 19,
+                        x: 318,
+                        y: centerY - 16,
+                        width: 163,
+                        height: 32,
+
+                        fontSize: 15,
+                        minimumFontSize: 9,
+
                         bold: false,
                         align: "center"
                     }
@@ -471,18 +633,22 @@ async function generatePiernografoJpg(data) {
 
 
                 /*
-                 * F:G - Numeral.
+                 * F:G
+                 * Numeral.
                  */
 
                 drawTextInExcelCell(
                     ctx,
                     pilot.numeral,
                     {
-                        x: 855,
-                        y: centerY - 19,
-                        width: 330,
-                        height: 38,
-                        fontSize: 19,
+                        x: 481,
+                        y: centerY - 16,
+                        width: 335,
+                        height: 32,
+
+                        fontSize: 15,
+                        minimumFontSize: 10,
+
                         bold: false,
                         align: "center"
                     }
@@ -492,21 +658,28 @@ async function generatePiernografoJpg(data) {
 
         /*
          * =====================================================
-         * H7: ALA O ESCUADRÓN
+         * H7:H10
+         *
+         * Ala o escuadrón.
+         * Es una celda combinada vertical.
          * =====================================================
          */
 
         drawTextInExcelCell(
             ctx,
             wingFor(
-                data.group?.callsign ?? ""
+                data.group?.callsign ??
+                ""
             ),
             {
-                x: 1185,
-                y: 382,
-                width: 245,
-                height: 171,
-                fontSize: 18,
+                x: 816,
+                y: 244,
+                width: 134,
+                height: 130,
+
+                fontSize: 14,
+                minimumFontSize: 9,
+
                 bold: true,
                 align: "center",
                 multiline: true
@@ -516,26 +689,41 @@ async function generatePiernografoJpg(data) {
 
         /*
          * =====================================================
-         * C14:C25 - NÚMERO DE WAYPOINT
-         * D14:D25 - NOMBRE ABREVIADO
-         * E14:E25 - ALTITUD
+         * PLAN DE VUELO
+         *
+         * Filas C14:E25.
+         *
+         * Primera fila de datos:
+         * y = 475 a 506 aproximadamente.
+         *
+         * Altura por fila:
+         * 31,35 píxeles.
          * =====================================================
          */
 
-        const waypointStartY = 666;
-        const waypointRowHeight = 41.1;
+        const waypointFirstRowY =
+            475;
+
+        const waypointRowHeight =
+            31.35;
+
 
         data.waypoints
             .slice(0, 12)
             .forEach((waypoint, index) => {
 
-                const y =
-                    waypointStartY +
-                    index * waypointRowHeight;
+                const rowY =
+                    waypointFirstRowY +
+                    index *
+                    waypointRowHeight;
 
 
                 /*
+                 * C14:C25
                  * Número.
+                 *
+                 * Límites:
+                 * x 72 a 141.
                  */
 
                 drawTextInExcelCell(
@@ -545,11 +733,14 @@ async function generatePiernografoJpg(data) {
                         index + 1
                     ),
                     {
-                        x: 160,
-                        y,
-                        width: 116,
+                        x: 72,
+                        y: rowY,
+                        width: 69,
                         height: waypointRowHeight,
-                        fontSize: 19,
+
+                        fontSize: 15,
+                        minimumFontSize: 10,
+
                         bold: false,
                         align: "center"
                     }
@@ -557,7 +748,11 @@ async function generatePiernografoJpg(data) {
 
 
                 /*
+                 * D14:D25
                  * Nombre abreviado.
+                 *
+                 * Límites:
+                 * x 141 a 318.
                  */
 
                 drawTextInExcelCell(
@@ -566,11 +761,14 @@ async function generatePiernografoJpg(data) {
                     waypoint.name ??
                     "",
                     {
-                        x: 276,
-                        y,
-                        width: 304,
+                        x: 141,
+                        y: rowY,
+                        width: 177,
                         height: waypointRowHeight,
-                        fontSize: 19,
+
+                        fontSize: 15,
+                        minimumFontSize: 9,
+
                         bold: false,
                         align: "center"
                     }
@@ -578,7 +776,11 @@ async function generatePiernografoJpg(data) {
 
 
                 /*
+                 * E14:E25
                  * Altitud.
+                 *
+                 * Límites:
+                 * x 318 a 481.
                  */
 
                 drawTextInExcelCell(
@@ -589,11 +791,14 @@ async function generatePiernografoJpg(data) {
                           )
                         : "",
                     {
-                        x: 580,
-                        y,
-                        width: 275,
+                        x: 318,
+                        y: rowY,
+                        width: 163,
                         height: waypointRowHeight,
-                        fontSize: 19,
+
+                        fontSize: 15,
+                        minimumFontSize: 9,
+
                         bold: false,
                         align: "center"
                     }
@@ -602,17 +807,23 @@ async function generatePiernografoJpg(data) {
 
 
         /*
-         * Convierte el resultado completo a JPG.
+         * =====================================================
+         * GENERACIÓN DEL JPG
+         * =====================================================
          */
 
         canvas.toBlob(
             (blob) => {
 
                 if (!blob) {
-                    throw new Error(
-                        "No se pudo crear la imagen."
+
+                    alert(
+                        "No se pudo crear el JPG."
                     );
+
+                    return;
                 }
+
 
                 const groupName =
                     fileKey(
@@ -620,15 +831,19 @@ async function generatePiernografoJpg(data) {
                         "grupo"
                     );
 
+
                 downloadBlob(
                     blob,
                     `piernografo_${
-                        groupName || "grupo"
+                        groupName ||
+                        "grupo"
                     }.jpg`
                 );
             },
+
             "image/jpeg",
-            0.96
+
+            0.97
         );
 
     } catch (error) {
@@ -638,9 +853,10 @@ async function generatePiernografoJpg(data) {
             error
         );
 
+
         alert(
-            "Se ha generado el XLSX, " +
-            "pero no se ha podido generar el JPG: " +
+            "El XLSX se ha generado, " +
+            "pero no se pudo generar el JPG: " +
             error.message
         );
     }
@@ -686,7 +902,10 @@ function drawTextInExcelCell(
         y,
         width,
         height,
-        fontSize = 18,
+
+        fontSize = 16,
+        minimumFontSize = 8,
+
         bold = false,
         align = "center",
         multiline = false
@@ -694,7 +913,11 @@ function drawTextInExcelCell(
 
 
     const value =
-        String(text ?? "").trim();
+        String(
+            text ??
+            ""
+        ).trim();
+
 
     if (!value) {
         return;
@@ -705,8 +928,7 @@ function drawTextInExcelCell(
 
 
     /*
-     * Recorta el texto dentro del área equivalente
-     * a la celda de Excel.
+     * Recorta el texto dentro de la celda.
      */
 
     ctx.beginPath();
@@ -721,43 +943,44 @@ function drawTextInExcelCell(
     ctx.clip();
 
 
-    ctx.fillStyle = "#000000";
+    ctx.fillStyle =
+        "#000000";
 
-    ctx.font =
-        `${
-            bold
-                ? "bold "
-                : ""
-        }${fontSize}px Arial`;
-
-    ctx.textBaseline = "middle";
+    ctx.textBaseline =
+        "middle";
 
 
     /*
-     * Alineación.
+     * Posición horizontal.
      */
 
     let textX;
 
+
     if (align === "left") {
 
-        ctx.textAlign = "left";
+        ctx.textAlign =
+            "left";
 
         textX =
-            x + 8;
+            x + 6;
 
-    } else if (align === "right") {
+    } else if (
+        align === "right"
+    ) {
 
-        ctx.textAlign = "right";
+        ctx.textAlign =
+            "right";
 
         textX =
             x +
             width -
-            8;
+            6;
 
     } else {
 
-        ctx.textAlign = "center";
+        ctx.textAlign =
+            "center";
 
         textX =
             x +
@@ -766,27 +989,29 @@ function drawTextInExcelCell(
 
 
     /*
-     * Una sola línea.
+     * Texto en una línea.
      */
 
     if (!multiline) {
 
-        const fittedFontSize =
+        const fittedSize =
             fitTextToCell(
                 ctx,
                 value,
-                width - 16,
+                width - 12,
                 fontSize,
-                11,
+                minimumFontSize,
                 bold
             );
+
 
         ctx.font =
             `${
                 bold
                     ? "bold "
                     : ""
-            }${fittedFontSize}px Arial`;
+            }${fittedSize}px Arial`;
+
 
         ctx.fillText(
             value,
@@ -795,6 +1020,7 @@ function drawTextInExcelCell(
             height / 2
         );
 
+
         ctx.restore();
 
         return;
@@ -802,29 +1028,78 @@ function drawTextInExcelCell(
 
 
     /*
-     * Varias líneas, utilizado principalmente
-     * para el nombre del ala.
+     * Texto multilínea.
      */
 
-    const lines =
-        splitTextIntoLines(
-            ctx,
-            value,
-            width - 16
-        );
+    let currentFontSize =
+        fontSize;
+
+    let lines = [];
+
+
+    while (
+        currentFontSize >=
+        minimumFontSize
+    ) {
+
+        ctx.font =
+            `${
+                bold
+                    ? "bold "
+                    : ""
+            }${currentFontSize}px Arial`;
+
+
+        lines =
+            splitTextIntoLines(
+                ctx,
+                value,
+                width - 12
+            );
+
+
+        const lineHeight =
+            currentFontSize *
+            1.15;
+
+
+        if (
+            lines.length *
+            lineHeight <=
+            height - 8
+        ) {
+            break;
+        }
+
+
+        currentFontSize -= 1;
+    }
+
+
+    ctx.font =
+        `${
+            bold
+                ? "bold "
+                : ""
+        }${currentFontSize}px Arial`;
+
 
     const lineHeight =
-        fontSize * 1.15;
+        currentFontSize *
+        1.15;
+
 
     const totalHeight =
         lines.length *
         lineHeight;
+
 
     let lineY =
         y +
         height / 2 -
         totalHeight / 2 +
         lineHeight / 2;
+
 
     lines.forEach((line) => {
 
@@ -833,6 +1108,7 @@ function drawTextInExcelCell(
             textX,
             lineY
         );
+
 
         lineY +=
             lineHeight;
