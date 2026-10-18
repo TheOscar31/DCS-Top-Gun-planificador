@@ -18,7 +18,7 @@ export async function loadDatabase() {
 
         database[file] =
             await fetch(
-                `data/${file}.json`
+                `${file}.json`
             ).then(r => r.json());
     }
 
